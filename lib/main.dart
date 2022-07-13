@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:social_network_flutter/pages/home.dart';
 
 void main() {
   runApp(MyApp());
@@ -10,7 +11,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FlutterShare',
       debugShowCheckedModeBanner: false,
-      home: Text("Hello World"),
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: Colors.teal),
+      ),
+      home: Home(),
     );
   }
 }
