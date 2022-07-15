@@ -21,7 +21,7 @@ class _TimelineState extends State<Timeline> {
     // getUserById();
     // createUser();
     // updateUser();
-    deleteUser();
+    // deleteUser();
     super.initState();
   }
 
@@ -83,22 +83,24 @@ class _TimelineState extends State<Timeline> {
   Widget build(context) {
     return Scaffold(
       appBar: header(context, isAppTitle: true),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: usersRef.snapshots(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return circularProgress();
-          }
-          final List<Text> children = snapshot.data.documents
-              .map((doc) => Text(doc['username']))
-              .toList();
-          return Container(
-            child: ListView(
-              children: children,
-            ),
-          );
-        },
-      ),
+      //   body: StreamBuilder<QuerySnapshot>(
+      //     stream: usersRef.snapshots(),
+      //     builder: (context, snapshot) {
+      //       if (!snapshot.hasData) {
+      //         return circularProgress();
+      //       }
+      //       final List<Text> children = snapshot.data.documents
+      //           .map((doc) => Text(doc['username']))
+      //           .toList();
+      //       return Container(
+      //         child: ListView(
+      //           children: children,
+      //         ),
+      //       );
+      //     },
+      //   ),
+      // );
+      body: Text('timeline'),
     );
   }
 }

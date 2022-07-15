@@ -1,13 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:social_network_flutter/models/user.dart';
 import 'package:social_network_flutter/pages/activity_feed.dart';
+import 'package:social_network_flutter/pages/create_account.dart';
 import 'package:social_network_flutter/pages/profile.dart';
 import 'package:social_network_flutter/pages/search.dart';
 import 'package:social_network_flutter/pages/timeline.dart';
 import 'package:social_network_flutter/pages/upload.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
+final usersRef = Firestore.instance.collection('users');
+final DateTime timestamp = DateTime.now();
+User currentUser;
 
 class Home extends StatefulWidget {
   @override
@@ -44,9 +50,9 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
-  handleSignin(GoogleSignInAccount account) {
+  handleSignin(GoogleSignInAccount account) async {
     if (account != null) {
-      print("User signed in : $account");
+      await createUserInFirestore();
       setState(() {
         isAuth = true;
       });
@@ -57,8 +63,39 @@ class _HomeState extends State<Home> {
     }
   }
 
-  login() {
-    googleSignIn.signIn();
+  createUserInFirestore() async {
+    // if check user exist in users collection di database
+    final GoogleSignInAccount user = googleSignIn.currentUser;
+    DocumentSnapshot doc = await usersRef.document(user.id).get();
+    // print("udh punya akun? ${doc.exists}");
+
+    if (!doc.exists) {
+      // if the user doesnt exist ,  then we wan to take them to create account page
+
+      final username = await Navigator.push(
+          context, MaterialPageRoute(builder: (context) => CreateAccount()));
+      // get username from create account, use it to make new user document in users collenction
+
+      usersRef.document(user.id).setData({
+        "id": user.id,
+        "username": username,
+        "photoUrl": user.photoUrl,
+        "email": user.email,
+        "displayName": user.displayName,
+        "bio": "",
+        "timestamp": timestamp,
+      });
+
+      doc = await usersRef.document(user.id).get();
+    }
+
+    currentUser = User.fromDocument(doc);
+    print(currentUser);
+    print(currentUser.username);
+  }
+
+  login() async {
+    await googleSignIn.signIn();
   }
 
   logout() {
@@ -83,7 +120,11 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: PageView(
         children: [
-          Timeline(),
+          // Timeline(),
+          TextButton(
+            onPressed: logout,
+            child: Text('Logout'),
+          ),
           ActivityFeed(),
           Upload(),
           Search(),
