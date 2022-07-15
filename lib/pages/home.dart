@@ -1,6 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:social_network_flutter/pages/activity_feed.dart';
+import 'package:social_network_flutter/pages/profile.dart';
+import 'package:social_network_flutter/pages/search.dart';
+import 'package:social_network_flutter/pages/timeline.dart';
+import 'package:social_network_flutter/pages/upload.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
 
@@ -11,10 +16,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool isAuth = false;
+  PageController pageController;
+  int pageIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    pageController = PageController();
     // detect sign in
     googleSignIn.onCurrentUserChanged.listen((account) {
       handleSignin(account);
@@ -28,6 +36,12 @@ class _HomeState extends State<Home> {
     }).catchError((err) {
       print(err);
     });
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
   }
 
   handleSignin(GoogleSignInAccount account) {
@@ -51,11 +65,64 @@ class _HomeState extends State<Home> {
     googleSignIn.signOut();
   }
 
-  Widget buildAuthScreen() {
-    return TextButton(
-      onPressed: logout,
-      child: Text('Logout'),
+  onPageChanged(int pageIndex) {
+    setState(() {
+      this.pageIndex = pageIndex;
+    });
+  }
+
+  onTap(int pageIndex) {
+    pageController.animateToPage(
+      pageIndex,
+      duration: Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
     );
+  }
+
+  Scaffold buildAuthScreen() {
+    return Scaffold(
+      body: PageView(
+        children: [
+          Timeline(),
+          ActivityFeed(),
+          Upload(),
+          Search(),
+          Profile(),
+        ],
+        controller: pageController,
+        onPageChanged: onPageChanged,
+        physics: NeverScrollableScrollPhysics(),
+      ),
+      bottomNavigationBar: CupertinoTabBar(
+        currentIndex: pageIndex,
+        onTap: onTap,
+        activeColor: Theme.of(context).primaryColor,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.whatshot),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.notifications_active),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+              Icons.photo_camera,
+              size: 35.0,
+            ),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_circle),
+          ),
+        ],
+      ),
+    );
+    // return TextButton(
+    //   onPressed: logout,
+    //   child: Text('Logout'),
+    // );
   }
 
   Scaffold buildUnAuthScreen() {
