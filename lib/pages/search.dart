@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
 class Search extends StatefulWidget {
   @override
@@ -6,9 +7,59 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
+  AppBar buildSearchField() {
+    return AppBar(
+      backgroundColor: Colors.white,
+      title: TextFormField(
+        decoration: InputDecoration(
+          hintText: "search for a user .. ",
+          filled: true,
+          prefixIcon: Icon(
+            Icons.account_box,
+            size: 28,
+          ),
+          suffixIcon: IconButton(
+            icon: Icon(Icons.clear),
+            onPressed: () => print('clear'),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container buildNoContent() {
+    return Container(
+      child: Center(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            SvgPicture.asset(
+              'assets/images/search.svg',
+              height: 300,
+            ),
+            Text(
+              'Find User',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.w600,
+                fontSize: 60,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Text('Search');
+    return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor.withOpacity(0.8),
+      appBar: buildSearchField(),
+      body: buildNoContent(),
+    );
   }
 }
 
