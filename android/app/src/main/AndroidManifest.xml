@@ -2,7 +2,7 @@
     package="com.madeean.social_network_flutter">
    <application
         android:label="social_network_flutter"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/madee_lator">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
