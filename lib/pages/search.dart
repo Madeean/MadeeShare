@@ -31,21 +31,25 @@ class _SearchState extends State<Search> {
   AppBar buildSearchField() {
     return AppBar(
       backgroundColor: Colors.white,
-      title: TextFormField(
-        controller: searchController,
-        decoration: InputDecoration(
-          hintText: "search for a user .. ",
-          filled: true,
-          prefixIcon: Icon(
-            Icons.account_box,
-            size: 28,
+      automaticallyImplyLeading: false,
+      title: Container(
+        width: MediaQuery.of(context).size.width,
+        child: TextFormField(
+          controller: searchController,
+          decoration: InputDecoration(
+            hintText: "search for a user .. ",
+            filled: true,
+            prefixIcon: Icon(
+              Icons.account_box,
+              size: 28,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(Icons.clear),
+              onPressed: clearSearch,
+            ),
           ),
-          suffixIcon: IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: clearSearch,
-          ),
+          onFieldSubmitted: handleSearch,
         ),
-        onFieldSubmitted: handleSearch,
       ),
     );
   }

@@ -40,8 +40,10 @@ class _EditProfileState extends State<EditProfile> {
     user = User.fromDocument(doc);
     displayNameController.text = user.displayName;
     bioController.text = user.bio;
-    setState(() {
-      isLoading = false;
+    Timer(Duration(seconds: 1), () {
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
