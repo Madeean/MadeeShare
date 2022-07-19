@@ -1,7 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/pages/home.dart';
 
 void main() {
+  // Firestore.instance.settings(timestampsInSnapshotsEnabled: true).then((_) {
+  //   print("timestamp enabled in snapshot\n");
+  // }, onError: (_) {
+  //   print("error enabling timestamp in spanshot \n");
+  // });
   runApp(MyApp());
 }
 
