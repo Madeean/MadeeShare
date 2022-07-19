@@ -77,6 +77,7 @@ class _PostState extends State<Post> {
   int likeCount;
   Map likes;
   bool _isLiked;
+  bool showHeart = false;
 
   _PostState({
     this.postId,
@@ -146,7 +147,16 @@ class _PostState extends State<Post> {
         likeCount += 1;
         _isLiked = true;
         likes[currentUserId] = true;
+        showHeart = true;
       });
+      Timer(
+        Duration(milliseconds: 500),
+        () {
+          setState(() {
+            showHeart = false;
+          });
+        },
+      );
     }
   }
 
@@ -157,6 +167,29 @@ class _PostState extends State<Post> {
         alignment: Alignment.center,
         children: [
           Image.network(mediaUrl),
+          // showHeart
+          //     ? Animator(
+          //         duration: Duration(microseconds: 300),
+          //         tween: Tween(begin: 0.8, end: 1.4),
+          //         curve: Curves.elasticOut,
+          //         cycles: 0,
+          //         builder: (anim) => Transform.scale(
+          //           scale: anim.value,
+          //           child: Icon(
+          //             Icons.favorite,
+          //             size: 80,
+          //             color: Colors.red,
+          //           ),
+          //         ),
+          //       )
+          //     : Text(""),
+          showHeart
+              ? Icon(
+                  Icons.favorite,
+                  size: 80,
+                  color: Colors.red,
+                )
+              : Text(""),
         ],
       ),
     );

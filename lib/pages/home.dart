@@ -190,12 +190,17 @@ class _HomeState extends State<Home> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'MadeeShare',
-              style: TextStyle(
-                fontFamily: "Signatra",
-                fontSize: 90,
-                color: Colors.white,
+            Container(
+              width: MediaQuery.of(context).size.width * 1,
+              alignment: Alignment.center,
+              child: Text(
+                'MadeeShare',
+                style: TextStyle(
+                  fontFamily: "Signatra",
+                  fontSize: 70,
+                  color: Colors.white,
+                ),
+                maxLines: 1,
               ),
             ),
             GestureDetector(
