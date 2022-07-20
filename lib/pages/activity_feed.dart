@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/pages/home.dart';
+import 'package:social_network_flutter/pages/profile.dart';
 import 'package:social_network_flutter/widgets/header.dart';
+import 'package:social_network_flutter/widgets/post_screen.dart';
 import 'package:social_network_flutter/widgets/progress.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
@@ -89,10 +91,24 @@ class ActivityFeedItem extends StatelessWidget {
     );
   }
 
-  configureMediaPreview() {
+  showPost(context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PostScreen(
+          postId: postId,
+          userId: userId,
+        ),
+      ),
+    );
+  }
+
+  configureMediaPreview(context) {
     if (type == "like" || type == "comment") {
       MediaPreview = GestureDetector(
-        onTap: () => print('showing post'),
+        onTap: () => showPost(
+          context,
+        ),
         child: Container(
           height: 50,
           width: 50,
@@ -126,14 +142,14 @@ class ActivityFeedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    configureMediaPreview();
+    configureMediaPreview(context);
     return Padding(
       padding: EdgeInsets.only(bottom: 2),
       child: Container(
         color: Colors.white54,
         child: ListTile(
           title: GestureDetector(
-            onTap: () => print("tapped"),
+            onTap: () => showProfile(context, profileId: userId),
             child: RichText(
               overflow: TextOverflow.ellipsis,
               text: TextSpan(
@@ -167,4 +183,15 @@ class ActivityFeedItem extends StatelessWidget {
       ),
     );
   }
+}
+
+showProfile(BuildContext context, {String profileId}) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Profile(
+        profileId: profileId,
+      ),
+    ),
+  );
 }
