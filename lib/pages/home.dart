@@ -20,6 +20,7 @@ final commentsRef = Firestore.instance.collection('comments');
 final activityFeedRef = Firestore.instance.collection('feed');
 final followersRef = Firestore.instance.collection('followers');
 final followingRef = Firestore.instance.collection('following');
+final timelineRef = Firestore.instance.collection('timeline');
 final DateTime timestamp = DateTime.now();
 User currentUser;
 
@@ -94,6 +95,12 @@ class _HomeState extends State<Home> {
         "timestamp": timestamp,
       });
 
+      await followersRef
+          .document(user.id)
+          .collection('userFollower')
+          .document(user.id)
+          .setData({});
+
       doc = await usersRef.document(user.id).get();
     }
 
@@ -128,11 +135,7 @@ class _HomeState extends State<Home> {
     return Scaffold(
       body: PageView(
         children: [
-          // Timeline(),
-          TextButton(
-            onPressed: logout,
-            child: Text('Logout'),
-          ),
+          Timeline(currentUser: currentUser),
           ActivityFeed(),
           Upload(
             currentUser: currentUser,
