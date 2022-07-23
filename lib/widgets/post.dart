@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:social_network_flutter/models/user.dart';
 import 'package:social_network_flutter/pages/activity_feed.dart';
@@ -107,6 +108,7 @@ class _PostState extends State<Post> {
           return circularProgress();
         }
         User user = User.fromDocument(snapshot.data);
+        bool isPostOwner = currentUserId == ownerId;
         return ListTile(
           leading: CircleAvatar(
             backgroundImage: CachedNetworkImageProvider(user.photoUrl),
@@ -126,13 +128,82 @@ class _PostState extends State<Post> {
             ),
           ),
           subtitle: Text(location),
-          trailing: IconButton(
-            onPressed: () => print("tapped 2"),
-            icon: Icon(Icons.more_vert),
-          ),
+          trailing: isPostOwner
+              ? IconButton(
+                  onPressed: () => handleDeletePost(context),
+                  icon: Icon(Icons.more_vert),
+                )
+              : Text(''),
         );
       },
     );
+  }
+
+  handleDeletePost(BuildContext parentContext) {
+    return showDialog(
+        context: parentContext,
+        builder: (context) {
+          return SimpleDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 5,
+            title: Text('remove this post?'),
+            children: [
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.pop(context);
+                  deletePost();
+                },
+                child: Text(
+                  'delete',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+              SimpleDialogOption(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Cancel'),
+              ),
+            ],
+          );
+        });
+  }
+
+  deletePost() async {
+    postRef
+        .document(ownerId)
+        .collection("userPosts")
+        .document(postId)
+        .get()
+        .then((value) {
+      if (value.exists) {
+        value.reference.delete();
+      }
+    });
+
+    storageRef.child("post_$postId.jpg").delete();
+
+    QuerySnapshot activityFeedSnapshot = await activityFeedRef
+        .document(ownerId)
+        .collection("feedItems")
+        .where("postId", isEqualTo: postId)
+        .getDocuments();
+
+    activityFeedSnapshot.documents.forEach((element) {
+      if (element.exists) {
+        element.reference.delete();
+      }
+    });
+
+    QuerySnapshot commentsSnapshot = await commentsRef
+        .document(postId)
+        .collection("comments")
+        .getDocuments();
+    commentsSnapshot.documents.forEach((element) {
+      if (element.exists) {
+        element.reference.delete();
+      }
+    });
   }
 
   handleLikePost() {
