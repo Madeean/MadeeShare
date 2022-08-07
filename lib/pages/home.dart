@@ -1,15 +1,19 @@
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:madee_share/pages/activity_feed.dart';
 import 'package:madee_share/pages/create_account.dart';
 import 'package:madee_share/pages/profile.dart';
+import 'package:madee_share/pages/register.dart';
 import 'package:madee_share/pages/search.dart';
 import 'package:madee_share/pages/timeline.dart';
 import 'package:madee_share/pages/upload.dart';
+import 'package:madee_share/widgets/progress.dart';
 
 import '../models/user_model.dart';
 
@@ -26,6 +30,11 @@ final timelineRef = FirebaseFirestore.instance.collection('timeline');
 final DateTime timestamp = DateTime.now();
 UserModel? currentUser;
 
+TextEditingController emailController = TextEditingController(text: '');
+TextEditingController passwordController = TextEditingController(text: '');
+
+FirebaseAuth _auth = FirebaseAuth.instance;
+
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -33,13 +42,20 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool isAuth = false;
+  bool isLoading = false;
   PageController? pageController;
   int pageIndex = 0;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
     pageController = PageController();
+
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      cekLoginEmail(user.uid);
+    }
+
     // detect sign in
     googleSignIn.onCurrentUserChanged.listen((account) {
       if (account == null) {
@@ -63,10 +79,49 @@ class _HomeState extends State<Home> {
     });
   }
 
+  cekLoginEmail(String id) async {
+    await getDataLoginWithEmail(id);
+    setState(() {
+      isAuth = true;
+    });
+  }
+
+  getDataLoginWithEmail(String id) async {
+    DocumentSnapshot snapshot = await usersRef.doc(id).get();
+    currentUser = UserModel.fromDocument(snapshot);
+  }
+
   @override
   void dispose() {
     pageController?.dispose();
     super.dispose();
+  }
+
+  Future<bool> loginHandle() async {
+    setState(() {
+      isLoading = true;
+    });
+    if (emailController.text == "" ||
+        passwordController.text == "" ||
+        emailController.text == null ||
+        passwordController.text == null) {
+      return false;
+    }
+    UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailController.text, password: passwordController.text);
+
+    if (userCredential.user == null) {
+      return false;
+    }
+
+    DocumentSnapshot snapshot =
+        await usersRef.doc(userCredential.user!.uid).get();
+    currentUser = UserModel.fromDocument(snapshot);
+    setState(() {
+      isAuth = true;
+    });
+
+    return true;
   }
 
   handleSignin(GoogleSignInAccount account) async {
@@ -103,6 +158,7 @@ class _HomeState extends State<Home> {
         "displayName": user?.displayName,
         "bio": "",
         "timestamp": timestamp,
+        "loginWith": "google",
       });
 
       await followersRef
@@ -207,6 +263,7 @@ class _HomeState extends State<Home> {
           children: [
             Container(
               width: MediaQuery.of(context).size.width * 1,
+              margin: EdgeInsets.only(top: 60),
               alignment: Alignment.center,
               child: Text(
                 'MadeeShare',
@@ -230,6 +287,127 @@ class _HomeState extends State<Home> {
                     ),
                     fit: BoxFit.cover,
                   ),
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(top: 30, left: 20, right: 20),
+              child: Container(
+                width: double.infinity,
+                height: 300,
+                decoration: BoxDecoration(
+                  color: Colors.white60.withOpacity(.9),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black54.withOpacity(.2),
+                      spreadRadius: 3,
+                      blurRadius: 2,
+                      offset: Offset(-2, 2),
+                    ),
+                  ],
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(left: 15, right: 15, top: 20),
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Email'),
+                          TextFormField(
+                            controller: emailController,
+                            cursorColor: Colors.black,
+                            decoration: InputDecoration(
+                              hintText: "Your Email",
+                              hintStyle: TextStyle(color: Colors.grey),
+                              focusColor: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 15, right: 15, top: 20),
+                      width: double.infinity,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Password'),
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: true,
+                            cursorColor: Colors.black,
+                            decoration: InputDecoration(
+                              hintText: "Your Password",
+                              hintStyle: TextStyle(color: Colors.grey),
+                              focusColor: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    isLoading
+                        ? Container(
+                            margin:
+                                EdgeInsets.only(left: 15, right: 15, top: 20),
+                            width: 100,
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                              ),
+                              onPressed: () {},
+                              child: circularProgress(),
+                            ),
+                          )
+                        : Container(
+                            margin:
+                                EdgeInsets.only(left: 15, right: 15, top: 20),
+                            width: 100,
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                backgroundColor: Colors.blue,
+                              ),
+                              onPressed: () async {
+                                if (await loginHandle()) {
+                                } else {
+                                  Fluttertoast.showToast(msg: "login failed");
+                                }
+                              },
+                              child: Text(
+                                'Login',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                    Container(
+                      margin: EdgeInsets.only(left: 15, right: 15, top: 20),
+                      width: double.infinity,
+                      child: Row(
+                        children: [
+                          Text('Dont Have an Account?'),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => RegisterPage()));
+                            },
+                            child: Text('Register',
+                                style: TextStyle(
+                                  color: Colors.red,
+                                )),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

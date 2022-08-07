@@ -11,7 +11,7 @@ class CreateAccount extends StatefulWidget {
 
 class _CreateAccountState extends State<CreateAccount> {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  late String username;
+  String? username;
   final _formKey = GlobalKey<FormState>();
 
   submit() {

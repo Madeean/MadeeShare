@@ -125,11 +125,22 @@ class _EditProfileState extends State<EditProfile> {
   @override
   Widget build(BuildContext context) {
     logout() async {
+      FirebaseAuth _auth = FirebaseAuth.instance;
+      DocumentSnapshot doc = await usersRef.doc(widget.currentUserId).get();
+      print("DOC ${doc['loginWith']}");
       // await googleSignIn.disconnect();
       print("p");
-      await googleSignIn.disconnect();
-      Navigator.pushAndRemoveUntil(context,
-          MaterialPageRoute(builder: (context) => Home()), (route) => false);
+
+      if (doc['loginWith'] == "email") {
+        await _auth.signOut();
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (context) => Home()), (route) => false);
+      } else {
+        await googleSignIn.disconnect();
+        Navigator.pushAndRemoveUntil(context,
+            MaterialPageRoute(builder: (context) => Home()), (route) => false);
+      }
+
       // print("p1");
       // await _auth.signOut();
       // print("p2");
